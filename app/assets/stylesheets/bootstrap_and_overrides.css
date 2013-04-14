@@ -1,0 +1,9 @@
+@import "bootstrap";
+@import "bootstrap-responsive";
+
+.footer {
+  text-align: center;
+  background-color: whiteSmoke;
+  width: 100%;
+  position: absolute;
+}

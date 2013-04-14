@@ -1,5 +1,4 @@
 ## Virtual lab works
-- - -
 
 This project should help virtualize existing Lab works on Radiophysics phaculty.
 
@@ -19,4 +18,4 @@ This work is a part of global project which idea is to create a global system fo
   - `bootstrap-sass`
 
 - - -
-This app - is diploma project made by Babenko Pavlo and Oleg Mokhnjuk
+#### This app - is diploma project made by **Babenko Pavlo** and **Oleg Mokhnjuk**
