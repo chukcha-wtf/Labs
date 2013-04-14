@@ -9,7 +9,7 @@ User will be able to look at some results and get all waluable information about
 This work is a part of global project which idea is to create a global system for online education. 
 
 - - -
-** Gems used **
+**Gems used**
 
   - `devise`
   - `simple_form`
