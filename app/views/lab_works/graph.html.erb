@@ -176,7 +176,6 @@
         .style("text-anchor", "end")
         .text("Current, V");
 
-    setTimeout(plotAndGo, duration);
   });
 
   function plotAndGo() {
@@ -283,14 +282,15 @@
       // Main functionality
       function draw() {
 
-        var k = 1, n = line_laseroff(data).values.length;
-        d3.timer( function() {
-          plotLine(line_laseroff(data)[k], "red");
-            if ((k += 2) >= n - 1) {
-              plotLine(line_laseroff(data)[n-1], "red");
-              return true;    
-          }
-        });
+        // var k = 1, n = line_laseroff(data).values.length;
+        // d3.timer( function() {
+        //   plotLine(line_laseroff(data)[k], "red");
+        //     if ((k += 2) >= n - 1) {
+        //       plotLine(line_laseroff(data)[n-1], "red");
+        //       return true;    
+        //   }
+        // });
+        plotLine(line_laseroff(data), "red");
         plotLine(line_laseron(data));
 
         //  adding points to the graph      
