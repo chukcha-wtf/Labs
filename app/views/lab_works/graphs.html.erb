@@ -1,0 +1,18 @@
+<div>
+  <div class="accordion" id="accordion1">
+    <% @lab_datas.each do |lab| %>
+    <div class="accordion-group">
+      <div class="accordion-heading">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion1" href="#collapse_<%= lab.id %>">
+          <%= lab.id %> Графік
+        </a>
+      </div>
+      <div id="collapse_<%= lab.id %>" class="accordion-body collapse">
+        <div class="accordion-inner">
+          <%= render 'show_graph', graph_data: lab %>
+        </div>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,431 @@
+<div class="span10 thumbnail">
+  <ul class="nav nav-tabs">
+      <li class="active"><a href="#graph_tab_<%= @lab_data.id %>" data-toggle="tab">Графік</a></li>
+      <li><a href="#table_tab_<%= @lab_data.id %>" data-toggle="tab">Дані</a></li>
+      <li><a href="#dV_tab_<%= @lab_data.id %>" data-toggle="tab">dV</a></li>
+    </ul>
+    <div class="tab-content" id="tabContent">
+      <div class="tab-pane active in" id="graph_tab_<%= @lab_data.id %>">
+        <div id="graph_<%= @lab_data.id %>" class="well">
+            <div id="option">
+              <input name="updateButton"
+              class="btn"
+              type="button"
+              value="Побудувати графік"
+              onclick="plotAndGo()"
+              />
+          </div>
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="table_tab_<%= @lab_data.id %>">
+        <div id="table_<%= @lab_data.id %>">
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="dV_tab_<%= @lab_data.id %>">
+        <div id="dV_<%= @lab_data.id %>" class="well">
+          <div id="option">
+              <input name="updateButton"
+              class="btn"
+              type="button"
+              value="Побудувати різницевий графік"
+              onclick="plotdV()"
+              />
+            </div>
+        </div>
+      </div>
+
+    </div>  
+</div>
+
+<script>
+  var margin = {top: 20, bottom: 30, left: 100, right: 20},
+      deviceWidth = $('#graph_<%= @lab_data.id %>').width(),
+      width = deviceWidth - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+
+  var x = d3.scale.linear()
+      .range([0, width]);
+
+  var y = d3.scale.linear()
+      .range([height, 0]);
+
+  var x_dv = d3.scale.linear()
+      .range([0, width]);
+
+  var y_dv = d3.scale.linear()
+      .range([height, 0]);
+
+  var duration = 1500,
+      delay = 500;
+
+  function xAxis() {
+    return d3.svg.axis()
+              .scale(x)
+              .orient("bottom")
+              .ticks(10);
+  }
+
+  function yAxis() {
+    return d3.svg.axis()
+              .scale(y)
+              .orient("left")
+              .ticks(20)
+  }
+
+  function x_dv_Axis() {
+    return d3.svg.axis()
+              .scale(x_dv)
+              .orient("bottom")
+              .ticks(10);
+  }
+
+  function y_dv_Axis() {
+    return d3.svg.axis()
+              .scale(y_dv)
+              .orient("left")
+              .ticks(20)
+  }
+
+  var line_laseroff = d3.svg.line()
+      .x(function (d) { return x(d.x_length); })
+      .y(function (d) { return y(d.laser_off); });
+
+  var line_laseron = d3.svg.line()
+      .x(function (d) { return x(d.x_length); })
+      .y(function (d) { return y(d.laser_on); });
+
+  var line_dV = d3.svg.line()
+      .x(function (d) { return x_dv(d.x_length); })
+      .y(function (d) { return y_dv(d.dV); });
+
+
+
+  // Applying div for tooltips
+  var div = d3.select("#graph_<%= @lab_data.id %>").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+  var div_dv = d3.select("#dV_<%= @lab_data.id %>").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+
+  // function updateData() {
+
+  // }    
+  d3.csv("<%= @lab_data.data.url %>", function(data) {
+
+    // Parsing data
+    data.forEach(function(d) {
+      d.x_length = +d.x_length;
+      d.laser_off = +d.laser_off;
+      d.laser_on = +d.laser_on;
+    });
+
+    var data = data;
+
+    var svg = d3.select("div#graph_<%= @lab_data.id %>").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    x.domain(d3.extent(data, function(d) { return d.x_length; }));
+    y.domain([d3.min(data, function(d) {return Math.min(d.laser_off, d.laser_on);}),
+          d3.max(data, function(d) { return Math.max(d.laser_off, d.laser_on); })]);
+
+
+
+    // draw the lines
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis()
+              .tickSize(-height, 0, 0)
+              .tickFormat("")
+              )
+
+    svg.append("g")
+        .attr("class", "grid")
+        .call(yAxis()
+              .tickSize(-width, 0, 0)
+              .tickFormat("")
+              )
+
+    // plotting axes
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis())
+      .append("text")
+        .attr("x", width/2)
+        .attr("dy", "-0.71em")
+        .text("X, mm");
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis())
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Current, V");
+
+    setTimeout(plotAndGo, duration);
+  });
+
+  function plotAndGo() {
+    d3.csv("<%= @lab_data.data.url %>", function(data) {
+
+      // Parsing data
+      data.forEach(function(d) {
+        d.x_length = +d.x_length;
+        d.laser_off = +d.laser_off;
+        d.laser_on = +d.laser_on;
+      });
+
+      var data = data;
+      var svg = d3.select("div#graph_<%= @lab_data.id %> g")
+
+      function plotLine(line, color, data) {
+        svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .style("stroke", color)
+            .attr("d", line);
+      }
+
+      function plotLaserOnPoint(data) {
+        svg.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+              .attr("r", 2)
+              .attr("cx", function(d) { return x(d.x_length); })
+              .attr("cy", function(d) { return y(d.laser_on); })
+              .on("mouseover", function(d) {
+                div.transition()
+                  .duration(200)
+                  .style("opacity", 0.9);
+                div.html("x coordinate: " + d.x_length + "<br/>" + "laser on: " + d.laser_on)
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 24) + "px");
+              })
+              .on("mouseout", function(d) {
+                div.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+              });
+      }
+
+      function plotLaserOffPoint(data) {
+        svg.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+              .attr("r", 2)
+              .attr("cx", function(d) { return x(d.x_length); })
+              .attr("cy", function(d) { return y(d.laser_off); })
+              .on("mouseover", function(d) {
+                div.transition()
+                  .duration(200)
+                  .style("opacity", 0.9);
+                div.html("x coordinate: " + d.x_length + "<br/>" + "laser on: " + d.laser_on)
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 24) + "px");
+              })
+              .on("mouseout", function(d) {
+                div.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+              });
+      }
+    
+      // Displaying table with data
+      function tabulate(data, columns) {
+        var table = d3.select("#table_<%= @lab_data.id %>").append("table")
+            .attr("class", "table table-bordered table-striped"),
+            thead = table.append("thead"),
+            tbody = table.append("tbody");
+        
+        // append the header row
+        thead.append("tr")
+          .selectAll("th")
+          .data(columns)
+          .enter()
+          .append("th")
+          .text(function(column) { return column; });
+
+        // create a row for each object in the data
+        var rows = tbody.selectAll("tr")
+          .data(data)
+          .enter()
+          .append("tr");
+
+        // create a cell in each row for each column
+        var cells = rows.selectAll("td")
+          .data(function(row) {
+            return columns.map(function(column) {
+              return {column: column, value: row[column]};
+            });
+          })
+          .enter()
+          .append("td")
+          .attr("style", "font-family: Courier")
+            .html(function(d) { return d.value; });
+
+        return table;
+      }
+
+      // Main functionality
+      function draw() {
+
+        var k = 1, n = line_laseroff(data).values.length;
+        d3.timer( function() {
+          plotLine(line_laseroff(data)[k], "red");
+            if ((k += 2) >= n - 1) {
+              plotLine(line_laseroff(data)[n-1], "red");
+              return true;    
+          }
+        });
+        plotLine(line_laseron(data));
+
+        //  adding points to the graph      
+        plotLaserOnPoint(data);
+        plotLaserOffPoint(data);
+      }
+
+      draw(data);
+      tabulate(data, ["x_length", "laser_off", "laser_on", "dV"]);
+    });    
+  }
+
+
+  // Plotting dV
+
+  d3.csv("<%= @lab_data.data.url %>", function(data) {
+
+    // Parsing data
+    data.forEach(function(d) {
+      d.x_length = +d.x_length;
+      d.dV = +d.dV;
+    });
+
+    var data = data;
+
+    var svg = d3.select("div#dV_<%= @lab_data.id %>").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    x_dv.domain(d3.extent(data, function(d) { return d.x_length; }));
+    y_dv.domain([d3.min(data, function(d) {return d.dV;}),
+              d3.max(data, function(d) { return d.dV; })]);
+
+
+
+    // draw the lines
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis()
+              .tickSize(-height, 0, 0)
+              .tickFormat("")
+              )
+
+    svg.append("g")
+        .attr("class", "grid")
+        .call(yAxis()
+              .tickSize(-width, 0, 0)
+              .tickFormat("")
+              )
+
+    // plotting axes
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(x_dv_Axis())
+      .append("text")
+        .attr("x", width/2)
+        .attr("dy", "-0.71em")
+        .text("X, mm");
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(y_dv_Axis())
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Current, V");
+  });
+
+  function plotdV() {
+    d3.csv("<%= @lab_data.data.url %>", function(data) {
+
+      // Parsing data
+      data.forEach(function(d) {
+        d.x_length = +d.x_length;
+        d.dV = +d.dV;
+      });
+
+      var data = data;
+      var svg = d3.select("div#dV_<%= @lab_data.id %> g")
+
+      function plotLine(line, color, data) {
+        svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .style("stroke", color)
+            .attr("d", line);
+      }
+
+      function plotDvPoint(data) {
+        svg.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+              .attr("r", 2)
+              .attr("cx", function(d) { return x_dv(d.x_length); })
+              .attr("cy", function(d) { return y_dv(d.dV); })
+              .on("mouseover", function(d) {
+                div_dv.transition()
+                  .duration(200)
+                  .style("opacity", 0.9);
+                div_dv.html("x coordinate: " + d.x_length + "<br/>" + "dV: " + d.dV)
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 24) + "px");
+              })
+              .on("mouseout", function(d) {
+                div_dv.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+              });
+      }
+
+      
+    
+      // Main functionality
+      function draw() {
+
+        plotLine(line_dV(data));
+
+        //  adding points to the graph      
+        plotDvPoint(data);
+
+      }
+
+      draw(data);
+    });    
+  }
+
+    
+
+
+  
+</script>

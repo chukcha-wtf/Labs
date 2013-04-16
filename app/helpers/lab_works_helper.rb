@@ -1,0 +1,2 @@
+module LabWorksHelper
+end

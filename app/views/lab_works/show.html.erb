@@ -1,0 +1,18 @@
+<% if @lab_work.id == 2 %>
+  <div class="center hero-unit">
+    <p>Вибачте, але ця робота ще на стадії розробки</p>
+    <br>
+    <p>Спробуйте заглянути пізніше...</p>
+  </div>
+<% else %>
+  <div class="hero-unit">
+    <h3><%= @lab_work.title %></h3>
+    <div class="row">
+      <div class="span6">
+        <p>На жаль, детальний опис роботи поки-що відсутній, проте Ви можете пройти тестування і проглянути графіки з даними.</p>
+      </div>
+      <%= link_to 'Пройти тестування', lab_work_questions_path(@lab_work), class: 'btn' %>
+      <%= link_to 'Подивитись на графіки', lab_work_graphs_path(@lab_work), class: 'btn btn-success' %>
+    </div>
+  </div>
+<% end %>

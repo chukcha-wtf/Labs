@@ -1,13 +1,28 @@
-<%= link_to "LabWorks", root_path, class: 'brand' %>
-<ul>
-  <% if user_signed_in? %>
-    <li>
-      <%= link_to "Logout", destroy_user_session_path, method: 'delet' %>
-    </li>
-    <% if current_user.has_role? :admin %>
-      <li>
-        <%= link_to "Administration", admin_path %>
+<%= link_to "Лабораторні роботи", root_path, class: 'brand' %>
+<div class="pull-right">
+  <ul class="nav pull-right">
+    <% if user_signed_in? %>
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <%= current_user.name %> <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <% if current_user.has_role? :admin %>
+            <li>
+              <%= link_to "Адміністрування", admin_path %>
+            </li>
+            <li>
+              <%= link_to "Лабораторні", lab_works_path %>
+            </li>
+          <% end %>
+          <li class="divider"></li>
+          <li>
+            <%= link_to destroy_user_session_path, method: 'delete'  do %>
+              <i class="icon-off"></i> Вийти з системи
+            <% end %>
+          </li>
+        </ul>
       </li>
     <% end %>
-  <% end %>
-</ul>
+  </ul>
+</div>

@@ -1,0 +1,16 @@
+<fieldset>
+<strong><%= f.label 'Відповідь:' %></strong>
+  <div class="input-append">
+    <%= f.text_field :content , class: "input-block-level"%>
+    <%= f.hidden_field :_destroy %>
+    <%= link_to '#', class: 'remove_fields' do %>
+      <i class="icon-trash"></i>
+    <% end %>
+  </div>
+  <div class="span6">
+    <%= f.check_box :wright_answer, class: "checkbox inline" %>
+    <%= f.label :wright_answer, "Це правильна відповідь?", class: 'checkbox'%>
+  </div>
+</fieldset>
+<hr>
+    

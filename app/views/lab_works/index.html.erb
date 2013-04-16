@@ -1,0 +1,16 @@
+<br />
+<div class="thumbnail">
+  <center><h2>Оберіть бажану Лабораторну роботу:</h2></center>
+</div>
+<br />
+<div class="row">
+<% @lab_works.each do |lab| %>
+  <div class="thumbnail span4 offset1">
+    <div class="center">
+      <h3><%= lab.title %></h3>
+      <p><%= lab.description %></p>
+      <%= link_to "Перейти", lab_work_path(lab), class: 'btn btn-large btn-info' %>
+    </div>
+  </div>
+<% end %>
+</div>

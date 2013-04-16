@@ -1,0 +1,20 @@
+<h3>Тестування на закріплення матеріалу</h3>
+
+<div class="row">
+  <div class="span6 offset3">
+    <br>
+    <% @questions.each do |question| %>
+      <blockquote>
+        <p><%= question.content %></p>
+      </blockquote>
+      <ol>
+        <% question.answers.each do |answer| %>
+          <li><%= check_box_tag :choice, item_wrapper_class: "checkbox inline" %><%= answer.content %></li>
+        <% end %>
+      </ol>
+      <br>
+      <hr>
+    <% end %>
+  </div>
+</div>
+<%= link_to 'Графік', lab_work_graph_path, class: 'btn btn-success' %>

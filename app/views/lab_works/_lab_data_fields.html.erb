@@ -1,0 +1,16 @@
+<div class="row">        
+  <div class="thumbnail span7">
+    <div class="caption">
+      <strong><%= f.label 'Дані для графіків:' %></strong>
+      <%= f.text_area :content, class: "input-block-level", rows: '4' %>
+      <%= f.check_box :_destroy , class: "checkbox inline"%>
+      <%= f.label :_destroy, "Видалити запитання" %>
+      <hr>
+      <%= f.fields_for :answers do |q| %>
+        <%= render 'answer_fields', f: q %>
+      <% end %>
+      <%= link_to_add_fields "Додати варіант відповіді", f, :answers %>
+    </div>
+  </div>
+</div>
+<br>

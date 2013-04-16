@@ -1,0 +1,55 @@
+@import "bootstrap";
+@import "bootstrap-responsive";
+
+footer {
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 70px;
+  border-top: 1px solid #E5E5E5;
+  background-color: whiteSmoke;
+  width: 100%;
+  position: absolute;
+}
+
+.center {
+  text-align: center;
+  margin-right: auto;
+  margin-left: auto;
+  margin-bottom: auto;
+  margin-top: auto;
+}
+
+path {
+  stroke: steelblue;
+  stroke-width: 2;
+  fill: none;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: grey;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 100px;
+  height: 40px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.grid .tick {
+  stroke: lightgrey;
+  opacity: 0.5;
+}
+
+.grid path {
+  stroke-width: 0;
+}

@@ -1,0 +1,38 @@
+<div class="row" id="up">
+  <div class='span9'>
+    <a href="#new_lab">Додати Лабораторну</a>
+    <ul>
+      <% @labs.each do |lab| %>
+        <li class='entry_li' id="lab_<%= lab.id %>">
+          <h2><b><%= link_to lab.title, lab_work_path(lab) %></b>
+            
+              <span class="edit_delete">
+                <%= link_to(edit_lab_work_path(lab)) do %>
+                  <i class="icon-pencil"></i>
+                <% end %> | 
+                <%= link_to lab, :method => :delete,
+                                  :remote => true,
+                                  :confirm => 'Ви точно хочете видалити лабораторну?' do %>
+                  <i class="icon-trash"></i>
+                <% end %>
+              </span>
+            
+          </h2>      
+          <br/>
+          <small>
+            <b>Created at:</b> <%= lab.created_at.strftime("%B %d, %Y") %>
+          </small>  
+        </li>
+      <% end %>
+    </ul>
+  </div>
+  <div class="span3" id="new_lab">
+    <div id='new_art' data-spy="affix">
+      <%= button_to 'New lab', new_lab_work_url,
+                                :method => :get,
+                                :class => 'btn btn-large' %>
+      <br/>
+      <a href="#up">Up!<a>
+    </div>
+  </div>
+</div>

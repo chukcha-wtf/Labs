@@ -1,0 +1,7 @@
+<%= form_for @lab_data, :html => {:multipart => true} do |f| %>
+  <%= f.error_messages %>
+  <p>
+    <%= f.file_field :data %>
+  </p>
+  <p><%= f.submit %></p>
+<% end %>
