@@ -1,16 +1,5 @@
 Labs::Application.routes.draw do
 
-  get "lab_datas/index"
-
-  get "lab_datas/show"
-
-  get "lab_datas/new"
-
-  get "lab_datas/edit"
-
-  get "lab_datas/create"
-
-  get "lab_datas/destroy"
 
   authenticated :user do
     root :to => "home#admin"
@@ -20,9 +9,9 @@ Labs::Application.routes.draw do
 
   devise_for :users
 
+  resources :lab_datas
   resources :lab_works do 
     match 'questions' => 'lab_works#questions', :as => :questions
-    match 'graphs' => 'lab_works#graphs', :as => :graphs
     match 'graph' => 'lab_works#graph', :as => :graph
   end
 

@@ -1,0 +1,327 @@
+<div id="graph_<%= lab_data.id %>" class="well">
+    <div id="option">
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <input name="startButton"
+            class="btn"
+            type="button"
+            value="Побудувати графік"
+            onclick="run()"
+          />
+          <input name="pauseButton"
+            class="btn"
+            type="button"
+            value="Пауза"
+            onclick="pause()"
+          />
+          <input name="stopButton"
+            class="btn"
+            type="button"
+            value="Зупинити"
+            onclick="notrun()"
+          />
+        </div>
+        <div class="btn-group">
+          <input name="laserOnButton"
+            class="btn"
+            type="button"
+            value="Лазер Увімк."
+            onclick="laserOn()"
+          />
+          <input name="laserOffButton"
+            class="btn"
+            type="button"
+            value="Лазер Вимк."
+            onclick="laserOff()"
+          />
+        </div>
+        <div class="btn-group">
+          <input id="delay" 
+            type="number"
+            value="1000"
+            class="span1"
+            onchange="setDelay()"
+          />
+        </div>
+      </div>
+      <div id="state_laser"></div>
+  </div>
+</div>
+
+<script>
+
+  var margin = {top: 20, bottom: 30, left: 100, right: 20},
+      deviceWidth = $('#graph_<%= lab_data.id %>').width(),
+      width = deviceWidth - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+  var stopGo, dat;
+
+  var laser_state = 'on';
+
+  var x = d3.scale.linear()
+      .range([0, width]);
+
+  var y = d3.scale.linear()
+      .range([height, 0]);
+
+  var duration = 1500,
+      delay = +$('#delay')[0].value;
+
+  function setDelay() {
+    delay = +$('#delay')[0].value;
+    console.log('chenged delay')
+  }
+
+  function xAxis() {
+    return d3.svg.axis()
+              .scale(x)
+              .orient("bottom")
+              .ticks(10);
+  }
+
+  function yAxis() {
+    return d3.svg.axis()
+              .scale(y)
+              .orient("left")
+              .ticks(20)
+  }
+
+  var line_laseroff = d3.svg.line()
+      .x(function (d) { return x(d.x_length); })
+      .y(function (d) { return y(d.laser_off); });
+
+  var line_laseron = d3.svg.line()
+      .x(function (d) { return x(d.x_length); })
+      .y(function (d) { return y(d.laser_on); });
+
+  var div = d3.select("#graph_<%= lab_data.id %>").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+  // Parsing data and drawing graph field
+  d3.csv("<%= lab_data.data.url %>", function(data) {
+
+    // Parsing data
+    data.forEach(function(d) {
+      d.x_length = +d.x_length;
+      d.laser_off = +d.laser_off;
+      d.laser_on = +d.laser_on;
+      d.dV = +d.dV;
+    });
+
+    dat = data;
+
+    var svg = d3.select("div#graph_<%= lab_data.id %>").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    x.domain(d3.extent(dat, function(d) { return d.x_length; }));
+    y.domain([d3.min(dat, function(d) {return Math.min(d.laser_off, d.laser_on);}),
+          d3.max(dat, function(d) { return Math.max(d.laser_off, d.laser_on); })]);
+
+
+
+    // draw the lines
+    svg.append("g")
+        .attr("class", "grid gridX")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis()
+              .tickSize(-height, 0, 0)
+              .tickFormat("")
+              )
+
+    svg.append("g")
+        .attr("class", "grid gridY")
+        .call(yAxis()
+              .tickSize(-width, 0, 0)
+              .tickFormat("")
+              )
+
+    // plotting axes
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis())
+      .append("text")
+        .attr("x", width/2)
+        .attr("dy", "-0.71em")
+        .text("X, mm");
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis())
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Current, V");
+
+  });
+
+  function plotLine(line, color, da) {
+    var svg = d3.select("div#graph_<%= lab_data.id %> g")
+    svg.append("path")
+        .datum(da)
+        .attr("class", "line experiment")
+        .style("stroke", color)
+        .attr("d", line)
+        .transition();
+  }
+
+  function plotTooltipPoint(da, on) {
+    var svg = d3.select("div#graph_<%= lab_data.id %> g")
+    svg.selectAll("dot")
+        .data(da)
+        .enter().append("circle")
+          .attr("class", "experiment")
+          .attr("r", 2)
+          .attr("cx", function(d) { return x(d.x_length); })
+          .attr("cy", function(d) { 
+            if (on) {
+              return y(d.laser_on);
+            } else {
+              return y(d.laser_off);
+            }
+          })
+          .on("mouseover", function(d) {
+            div.transition()
+              .duration(300)
+              .style("opacity", 0.9);
+            if (on) {
+              div.html("x, mm: " + d.x_length + "<br/>" + "laser on, V: " + d.laser_on)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 24) + "px");
+            } else{
+              div.html("x, mm: " + d.x_length + "<br/>" + "laser off, V: " + d.laser_off)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 24) + "px");
+
+            };
+          })
+          .on("mouseout", function(d) {
+            div.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+  }
+
+  function draw(k) {
+    if (stopGo === 'run') {
+      // Main functionality
+      if (laser_state === 'on') {
+
+        plotLine(line_laseron(dat.slice(k, k+2)), "red", dat.slice(k, k+2));
+        plotLine(line_laseroff(dat.slice(k, k+2)), "lightblue", dat.slice(k, k+2));
+        //  adding points to the graph      
+        plotTooltipPoint(dat.slice(k, k+2), 'on');
+        plotTooltipPoint(dat.slice(k, k+2));
+
+      } 
+      else if (laser_state === 'off') {
+  
+        plotLine(line_laseroff(dat.slice(k, k+2)), "lightblue", dat.slice(k, k+2));
+        //  adding points to the graph      
+  
+        plotTooltipPoint(dat.slice(k, k+2));
+      };
+  
+      tabulate(dat.slice(0, k+1));
+    } else {
+      return;
+    }
+  }
+
+  function laserStateInfo() {
+    if (laser_state === 'on') {
+        $("div#state_laser").empty().append('Laser: ' + '<span class="text-error">' + laser_state + '</span>');    
+      } else if (laser_state === 'off'){
+        $("div#state_laser").empty().append('Laser: ' + '<span class="text-info">' + laser_state + '</span>');        
+    };
+  }
+
+  function laserOn() {
+    if (laser_state === 'on') {
+      laserStateInfo();
+      return;
+    } else if (laser_state === 'off'){
+
+      laser_state = 'on';
+      laserStateInfo();
+    };
+  }
+
+  function laserOff() {
+    if (laser_state === 'on') {
+
+      laser_state = 'off'
+      laserStateInfo();
+
+    } else if (laser_state === 'off'){
+
+      laserStateInfo();
+      return;
+
+    };
+  }
+
+  function notrun() {
+    stopGo = 'stop';
+  }
+
+  function pause() {
+    if (stopGo == 'run') {
+      stopGo = 'pause';
+      console.log(stopGo);
+    } 
+    else if (stopGo == 'pause') {
+      stopGo = 'run';
+      console.log(stopGo);
+    }
+
+  }
+
+  function run() {
+    if (stopGo === 'pause') {
+      stopGo = 'run';
+    } 
+    else if (stopGo === 'run') {
+      stopGo = 'run'
+    }
+    else {
+      stopGo = 'run';
+      d3.selectAll("div#graph_<%= lab_data.id %> svg path.line.experiment").remove();
+      d3.selectAll("div#graph_<%= lab_data.id %> svg circle.experiment").remove();
+      
+      var k=-1, n=dat.length;
+      setInterval(function(){
+        if (stopGo === 'run') {
+            if ((k += 1) <= n) {
+              if (stopGo === 'run') {
+                draw(k);
+                measurment_state = 'running';
+              }
+              else if (stopGo === 'stop') {
+                k = n;
+              }
+            };
+            if (k === n) {
+              measurment_state = 'finished';
+            };
+        } else if (stopGo === 'pause') {
+          k = k;
+        } else {
+          k = n;
+        };
+      }, delay);
+      measurment_state = 'finished';
+    }
+  }
+
+  laserStateInfo();
+
+</script>

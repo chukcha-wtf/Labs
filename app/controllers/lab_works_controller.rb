@@ -9,8 +9,8 @@ class LabWorksController < ApplicationController
   end
 
   def graphs
-    @lab_work = LabWork.find(params[:lab_work_id])
-    @lab_datas = @lab_work.lab_datas
+    # @lab_work = LabWork.find(params[:lab_work_id])
+    @lab_datas = LabData.where(:lab_work_id => 1).page(params[:page]).per(5)
   end
 
   def graph

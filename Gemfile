@@ -21,6 +21,7 @@ gem 'simple_form', '>= 2.0.4'
 gem 'cancan', '>= 1.6.8'
 gem 'rolify', '>= 3.2.0'
 gem 'redcarpet'
+gem 'kaminari', '>= 0.14.1'
 
 gem 'carrierwave'
 gem 'd3_rails'

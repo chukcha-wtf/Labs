@@ -1,0 +1,3 @@
+$('div#l_works').html('<%= escape_javascript render(@lab_datas) %>');
+
+$('#pagination').html('<%= escape_javascript paginate(@lab_datas, remote: true).to_s %>')

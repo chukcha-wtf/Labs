@@ -5,6 +5,7 @@ class LabDatasController < ApplicationController
 
 
   def index
+    @lab_datas = LabData.page(params[:page]).per(5)
   end
 
   def show

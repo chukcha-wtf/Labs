@@ -1,0 +1,45 @@
+<div id="table_<%= lab_data.id %>">
+</div>
+
+<script>
+
+  var rows;
+  var columns = ["x_length", "laser_off", "laser_on", "dV"];
+
+  // Displaying table with data
+  var table = d3.select("#table_<%= @lab_data.id %>").append("table")
+      .attr("class", "table table-bordered table-striped table-hover"),
+      thead = table.append("thead"),
+      tbody = table.append("tbody");
+
+  // append the header row
+  thead.append("tr")
+    .selectAll("th")
+    .data(columns)
+    .enter()
+    .append("th")
+    .text(function(column) { return column; });
+
+  function tabulate(data) { 
+
+    // create a row for each object in the data
+    rows = tbody.selectAll("tr")
+      .data(data)
+      .enter()
+      .append("tr");
+
+    // create a cell in each row for each column
+    var cells = rows.selectAll("td")
+      .data(function(row) {
+        return columns.map(function(column) {
+          return {column: column, value: row[column]};
+        });
+      })
+      .enter()
+      .append("td")
+      .attr("style", "font-family: Courier")
+        .html(function(d) { return d.value; });
+
+  }
+
+</script>

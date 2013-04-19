@@ -39,14 +39,6 @@
         <br>
       </div>
 
-      <div class="tab-pane fade" id="lab_datas">
-        <%= f.fields_for :lab_datas, id: "tab3" do |q| %>
-          <%= render 'lab_data_fields', f: q %>
-        <% end %>
-        <%= link_to_add_fields "Додати запитання", f, :questions %>
-        <br>
-      </div>
-
       <div class="actions">
         <%= f.submit 'Застосувати зміни', class: 'btn pull-right' %>
       </div>
