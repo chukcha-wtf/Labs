@@ -3,6 +3,7 @@
       <li class="active"><a href="#graph_tab_<%= @lab_data.id %>" data-toggle="tab">Графік</a></li>
       <li><a href="#table_tab_<%= @lab_data.id %>" data-toggle="tab">Дані</a></li>
       <li><a href="#dV_tab_<%= @lab_data.id %>" data-toggle="tab">dV</a></li>
+      <li><a href="#calc_tab_<%= @lab_data.id %>" data-toggle="tab">ln(dV)</a></li>
     </ul>
     <div class="tab-content" id="tabContent">
       <div class="tab-pane active in" id="graph_tab_<%= @lab_data.id %>">
@@ -14,7 +15,11 @@
       </div>
 
       <div class="tab-pane fade" id="dV_tab_<%= @lab_data.id %>">
-        <%= render 'calculations', :lab_data => @lab_data %>       
+        <%= render 'difference', :lab_data => @lab_data %>  
+      </div>
+
+      <div class="tab-pane fade" id="calc_tab_<%= @lab_data.id %>">
+        <%= render 'calculations', :lab_data => @lab_data %>  
       </div>
     </div>  
 </div>

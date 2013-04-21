@@ -1,151 +1,155 @@
-<div id="dV_<%= lab_data.id %>" class="well">
-  <div id="option">
-      <input name="updateButton"
+<div id="calc_<%= lab_data.id %>" class="well">
+  <div id="option_calc">
+    <input name="lnDvButton"
       class="btn"
       type="button"
-      value="Побудувати різницевий графік"
-      onclick="plotdV()"
-      />
-    </div>
+      value="Побудувати логарифмічний графік"
+      onclick="plotLnDv()"
+    />
+  </div>
 </div>
 
 <script>
-   
   // Variables for line plotting
-  var X1, Y1, X2, Y2;
+  var X1, Y1, X2, Y2, points, calculation_state;
   var points = [];
+  var dat_ln = [];
+
 
   var dragged = null,
       selected = points[0];
 
-  var line = d3.svg.line();
+  var x_calc = d3.scale.linear()
+            .range([0, width]);
 
-  var measurment_state = 'not_runned';
+  var y_calc = d3.scale.linear()
+            .range([height, 0]);
 
-  // Graph plotting variables
-  var x_dv = d3.scale.linear()
-      .range([0, width]);
-
-  var y_dv = d3.scale.linear()
-      .range([height, 0]);
-
-  function x_dv_Axis() {
+  function x_calc_Axis() {
     return d3.svg.axis()
-              .scale(x_dv)
+              .scale(x_calc)
               .orient("bottom")
               .ticks(10);
   }
 
-  function y_dv_Axis() {
+  function y_calc_Axis() {
     return d3.svg.axis()
-              .scale(y_dv)
+              .scale(y_calc)
               .orient("left")
-              .ticks(20)
+              .ticks(10)
   }
 
-  var line_dV = d3.svg.line()
-      .x(function (d) { return x_dv(d.x_length); })
-      .y(function (d) { return y_dv(d.dV); });
+  var line_calc_dv = d3.svg.line()
+      .x(function (d) { return x_calc(d.x_ln); })
+      .y(function (d) { return y_calc(d.ln_dV); });
 
-  var div_dv = d3.select("#dV_<%= lab_data.id %>").append("div")
+  var div_calc_dv = d3.select("#calc_<%= lab_data.id %>").append("div")
       .attr("class", "tooltip")
+      .attr("id", "ln_dV_tooltip")
       .style("opacity", 0);
 
-function plotDvGrid() {
+function plotLnDvGrid() {
 
-  var svg = d3.select("div#dV_<%= lab_data.id %>").append("svg")
+    dat.forEach(function(d) {
+      if (d.dV > 0) {
+        var line_ln = {};
+        line_ln.ln_dV = Math.log(d.dV).toPrecision(6);
+        line_ln.x_ln = d.x_length;
+        dat_ln.push(line_ln);
+      };
+    });
+
+  var svg = d3.select("div#calc_<%= lab_data.id %>").append("svg")
               .attr("width", width + margin.left + margin.right)
               .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    x_dv.domain(d3.extent(dat, function(d) { return d.x_length; }));
-    y_dv.domain([d3.min(dat, function(d) {return d.dV;}),
-              d3.max(dat, function(d) { return d.dV; })]);
-
-
+    x_calc.domain(d3.extent(dat_ln, function(d) { return d.x_ln; }));
+    y_calc.domain([d3.max(dat_ln, function(d) { return d.ln_dV; }),
+                    d3.min(dat_ln, function(d) { return d.ln_dV; })]);
 
     // draw the lines
     svg.append("g")
-        .attr("class", "grid")
+        .attr("class", "grid gridLnX")
         .attr("transform", "translate(0," + height + ")")
-        .call(x_dv_Axis()
+        .call(x_calc_Axis()
               .tickSize(-height, 0, 0)
               .tickFormat("")
-              )
+              );
 
     svg.append("g")
-        .attr("class", "grid")
-        .call(y_dv_Axis()
+        .attr("class", "grid gridLnY")
+        .call(y_calc_Axis()
               .tickSize(-width, 0, 0)
               .tickFormat("")
-              )
+              );
 
     // plotting axes
     svg.append("g")
-        .attr("class", "x axis")
+        .attr("class", "x axis xLnAxis")
         .attr("transform", "translate(0," + height + ")")
-        .call(x_dv_Axis())
+        .call(x_calc_Axis())
       .append("text")
         .attr("x", width/2)
         .attr("dy", "-0.71em")
         .text("X, mm");
 
     svg.append("g")
-        .attr("class", "y axis")
-        .call(y_dv_Axis())
+        .attr("class", "y axis yLnAxis")
+        .call(y_calc_Axis())
       .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
-        .text("Current, V");
-
+        .text("ln(dV)");
 };
   
-  function plotDvLine(line, color, da) {
-    var svg = d3.select("div#dV_<%= lab_data.id %> g")
+  function plotLnDvLine(line, color, da) {
+    var svg = d3.select("div#calc_<%= lab_data.id %> g")
     svg.append("path")
         .datum(da)
-        .attr("class", "line")
-        .attr("id", "inf")
+        .attr("class", "line Ln")
         .style("stroke", color)
         .attr("d", line)
-        .transition()
-        .delay(1000);
+        .transition();
   }
 
-  function plotDvPoint(da) {
-    var svg = d3.select("div#dV_<%= lab_data.id %> g")
+  function plotLnDvPoint(da) {
+    var svg = d3.select("div#calc_<%= lab_data.id %> g")
     svg.selectAll("dot")
         .data(da)
         .enter().append("circle")
-          .attr("id", "info")
+          .attr("class", "Ln calc")
           .attr("r", 2)
-          .attr("cx", function(d) { return x_dv(d.x_length); })
-          .attr("cy", function(d) { return y_dv(d.dV); })
+          .attr("cx", function(d) { return x_calc(d.x_ln); })
+          .attr("cy", function(d) { return y_calc(d.ln_dV); })
           .on("mouseover", function(d) {
-            div_dv.transition()
+            div_calc_dv.transition()
               .duration(200)
               .style("opacity", 0.9);
-            div_dv.html("x coordinate: " + d.x_length + "<br/>" + "dV: " + d.dV)
+            div_calc_dv.html("x coordinate: " + d.x_ln + "<br/>" + "dV: " + d.ln_dV)
               .style("left", (d3.event.pageX) + "px")
               .style("top", (d3.event.pageY - 24) + "px");
           })
           .on("mouseout", function(d) {
-            div_dv.transition()
+            div_calc_dv.transition()
               .duration(500)
               .style("opacity", 0);
           });
   }
 
-  function plotdV() {
+  function plotLnDv() {
 
     if (measurment_state === 'finished') {
-      plotDvLine(line_dV(dat), "lightblue", dat);
+      d3.selectAll("div#calc_<%= lab_data.id %> svg path.line.Ln").remove();
+      d3.selectAll("div#calc_<%= lab_data.id %> svg circle.Ln").remove();
+
+      plotLnDvLine(line_calc_dv(dat_ln), "lightblue", dat_ln);
       //  adding points to the graph      
-      plotDvPoint(dat);
+      plotLnDvPoint(dat_ln);
     } else if (measurment_state === 'running') {
       alert('Вимірювання ще не закінчено.');
     } else {
@@ -154,5 +158,12 @@ function plotDvGrid() {
 
   }
 
-  setTimeout(plotDvGrid, duration);
+  setInterval(function() {
+    if(dat_state === 'ready') {
+      plotLnDvGrid();
+      console.log('we are ready');
+      dat_state = 'done';
+    }
+  }, duration);
+
 </script>

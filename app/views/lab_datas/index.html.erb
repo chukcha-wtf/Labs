@@ -1,13 +1,13 @@
 <div>
   <div class="accordion" id="accordion1">
-    <div id="pagination" class="text-center">
+    <div id="pagination_up" class="text-center">
       <%= paginate @lab_datas, remote: true %>
     </div>
     <div id="l_works">
       <%= render @lab_datas %>
     </div>
   </div>
-  <div id="pagination" class="text-center">
+  <div id="pagination_down" class="text-center">
     <%= paginate @lab_datas, remote: true %>
   </div>
 </div>

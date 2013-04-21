@@ -55,6 +55,9 @@
 #     puts "question: " << question2.content
 
 puts 'LAB DATA'
+    LabData.destroy_all
+
+
     dir = Dir.open('/home/chukcha/Dropbox/code/Diplom/data_for_graphs_unparsed')
     dir.each do |file|
       next if File.directory? file
@@ -63,4 +66,6 @@ puts 'LAB DATA'
                       title:  file)
       l.save!
       puts file
+      puts "Saved!"
     end
+    puts "Totally #{LabData.all.length} Lab Works, YaY!"

@@ -38,7 +38,7 @@
         <div class="btn-group">
           <input id="delay" 
             type="number"
-            value="1000"
+            value="10"
             class="span1"
             onchange="setDelay()"
           />
@@ -55,7 +55,7 @@
       width = deviceWidth - margin.left - margin.right,
       height = 300 - margin.top - margin.bottom;
 
-  var stopGo, dat;
+  var stopGo, dat, dat_state; 
 
   var laser_state = 'on';
 
@@ -84,7 +84,7 @@
     return d3.svg.axis()
               .scale(y)
               .orient("left")
-              .ticks(20)
+              .ticks(10)
   }
 
   var line_laseroff = d3.svg.line()
@@ -111,6 +111,7 @@
     });
 
     dat = data;
+    dat_state = 'ready';
 
     var svg = d3.select("div#graph_<%= lab_data.id %>").append("svg")
                     .attr("width", width + margin.left + margin.right)
@@ -132,14 +133,14 @@
         .call(xAxis()
               .tickSize(-height, 0, 0)
               .tickFormat("")
-              )
+              );
 
     svg.append("g")
         .attr("class", "grid gridY")
         .call(yAxis()
               .tickSize(-width, 0, 0)
               .tickFormat("")
-              )
+              );
 
     // plotting axes
     svg.append("g")
@@ -186,7 +187,7 @@
               return y(d.laser_on);
             } else {
               return y(d.laser_off);
-            }
+            };
           })
           .on("mouseover", function(d) {
             div.transition()
@@ -221,6 +222,9 @@
         plotTooltipPoint(dat.slice(k, k+2), 'on');
         plotTooltipPoint(dat.slice(k, k+2));
 
+        plotDvLine(line_dV(dat.slice(k, k+2)), "lightblue", dat.slice(k, k+2));
+        plotDvPoint(dat.slice(k, k+2), 'on');
+
       } 
       else if (laser_state === 'off') {
   
@@ -228,6 +232,9 @@
         //  adding points to the graph      
   
         plotTooltipPoint(dat.slice(k, k+2));
+
+        plotDvLine(line_dV(dat.slice(k, k+2)), "lightblue", dat.slice(k, k+2));
+        plotDvPoint(dat.slice(k, k+2));
       };
   
       tabulate(dat.slice(0, k+1));
@@ -296,6 +303,11 @@
       stopGo = 'run';
       d3.selectAll("div#graph_<%= lab_data.id %> svg path.line.experiment").remove();
       d3.selectAll("div#graph_<%= lab_data.id %> svg circle.experiment").remove();
+      d3.selectAll("div#table_<%= @lab_data.id %> tbody tr").remove();
+      d3.selectAll("div#dV_<%= lab_data.id %> svg path.line.inf").remove();
+      d3.selectAll("div#dV_<%= lab_data.id %> svg circle.info").remove();
+      d3.selectAll("div#calc_<%= lab_data.id %> svg path.line.Ln").remove();
+      d3.selectAll("div#calc_<%= lab_data.id %> svg circle.Ln").remove();
       
       var k=-1, n=dat.length;
       setInterval(function(){

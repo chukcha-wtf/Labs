@@ -1,0 +1,134 @@
+<div id="dV_<%= lab_data.id %>" class="well">
+  <div id="option">
+  </div>
+</div>
+
+<script>
+   
+  var measurment_state = 'not_runned';
+  var difference_state;
+
+  // Graph plotting variables
+  var x_dv = d3.scale.linear()
+      .range([0, width]);
+
+  var y_dv = d3.scale.linear()
+      .range([height, 0]);
+
+  function x_dv_Axis() {
+    return d3.svg.axis()
+              .scale(x_dv)
+              .orient("bottom")
+              .ticks(10);
+  }
+
+  function y_dv_Axis() {
+    return d3.svg.axis()
+              .scale(y_dv)
+              .orient("left")
+              .ticks(10)
+  }
+
+  var line_dV = d3.svg.line()
+      .x(function (d) { return x_dv(d.x_length); })
+      .y(function (d) { return y_dv(d.dV); });
+
+  var div_dv = d3.select("#dV_<%= lab_data.id %>").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+function plotDvGrid() {
+
+  var svg = d3.select("div#dV_<%= lab_data.id %>").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    x_dv.domain(d3.extent(dat, function(d) { return d.x_length; }));
+    y_dv.domain([d3.min(dat, function(d) {return d.dV;}),
+              d3.max(dat, function(d) { return d.dV; })]);
+
+
+
+    // draw the lines
+    svg.append("g")
+        .attr("class", "grid")
+        .attr("transform", "translate(0," + height + ")")
+        .call(x_dv_Axis()
+              .tickSize(-height, 0, 0)
+              .tickFormat("")
+              )
+
+    svg.append("g")
+        .attr("class", "grid")
+        .call(y_dv_Axis()
+              .tickSize(-width, 0, 0)
+              .tickFormat("")
+              )
+
+    // plotting axes
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(x_dv_Axis())
+      .append("text")
+        .attr("x", width/2)
+        .attr("dy", "-0.71em")
+        .text("X, mm");
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(y_dv_Axis())
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("dV, V");
+
+};
+  
+  function plotDvLine(line, color, da) {
+    var svg = d3.select("div#dV_<%= lab_data.id %> g")
+    svg.append("path")
+        .datum(da)
+        .attr("class", "line inf")
+        .style("stroke", color)
+        .attr("d", line)
+        .transition()
+  }
+
+  function plotDvPoint(da, on) {
+    var svg = d3.select("div#dV_<%= lab_data.id %> g")
+    svg.selectAll("dot")
+        .data(da)
+        .enter().append("circle")
+          .attr("class", "info")
+          .attr("r", 2)
+          .attr("cx", function(d) { return x_dv(d.x_length); })
+          .attr("cy", function(d) { 
+            if (on) {
+              return y_dv(d.dV);
+            } else {
+              return y_dv(d.laser_off);
+            };
+          })
+          .on("mouseover", function(d) {
+            div_dv.transition()
+              .duration(200)
+              .style("opacity", 0.9);
+            div_dv.html("x coordinate: " + d.x_length + "<br/>" + "dV: " + d.dV)
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 24) + "px");
+          })
+          .on("mouseout", function(d) {
+            div_dv.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+  }
+
+  setTimeout(plotDvGrid, duration);
+</script>
