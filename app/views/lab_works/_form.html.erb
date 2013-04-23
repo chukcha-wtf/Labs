@@ -3,11 +3,11 @@
     <ul class="nav nav-tabs">
       <li class="active"><a href="#description" data-toggle="tab">Опис</a></li>
       <li><a href="#quest" data-toggle="tab">Запитання</a></li>
-      <li><a href="#lab_data" data-toggle="tab">Дані для графіків</a></li>
+      <!-- <li><a href="#lab_data" data-toggle="tab">Дані для графіків</a></li> -->
     </ul>
     <div class="tab-content" id="tabContent">
-      <div class="tab-pane active in" id="description">
         <%= form_for @lab_work, id: "tab" do |f| %>
+      <div class="tab-pane active in" id="description">
           <% if @lab_work.errors.any? %>
             <div class="alert alert-block">
               <button type="button" class="close" data-dismiss="alert">&times;</button>

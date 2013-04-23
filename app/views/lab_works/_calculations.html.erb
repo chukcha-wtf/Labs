@@ -7,17 +7,25 @@
       onclick="plotLnDv()"
     />
   </div>
+  <div id="tangens">
+    <dl class="dl-horizontal">
+      <dt>tg(l):</dt>
+      <dd></dd>
+    </dl>
+  </div>
 </div>
 
 <script>
   // Variables for line plotting
-  var X1, Y1, X2, Y2, points, calculation_state;
+  var X1, Y1, X2, Y2, svg_1, calculation_state;
   var points = [];
   var dat_ln = [];
 
 
   var dragged = null,
       selected = points[0];
+
+  var line = d3.svg.line();
 
   var x_calc = d3.scale.linear()
             .range([0, width]);
@@ -48,27 +56,25 @@
       .attr("id", "ln_dV_tooltip")
       .style("opacity", 0);
 
-function plotLnDvGrid() {
+  function plotLnDvGrid() {
 
     dat.forEach(function(d) {
       if (d.dV > 0) {
         var line_ln = {};
-        line_ln.ln_dV = Math.log(d.dV).toPrecision(6);
+        line_ln.ln_dV = +Math.log(d.dV).toPrecision(6);
         line_ln.x_ln = d.x_length;
         dat_ln.push(line_ln);
       };
     });
 
-  var svg = d3.select("div#calc_<%= lab_data.id %>").append("svg")
+    var svg = d3.select("div#calc_<%= lab_data.id %>").append("svg")
               .attr("width", width + margin.left + margin.right)
               .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
     x_calc.domain(d3.extent(dat_ln, function(d) { return d.x_ln; }));
-    y_calc.domain([d3.max(dat_ln, function(d) { return d.ln_dV; }),
-                    d3.min(dat_ln, function(d) { return d.ln_dV; })]);
+    y_calc.domain(d3.extent(dat_ln, function(d) { return d.ln_dV; }));
 
     // draw the lines
     svg.append("g")
@@ -105,7 +111,24 @@ function plotLnDvGrid() {
         .attr("dy", ".71em")
         .style("text-anchor", "end")
         .text("ln(dV)");
-};
+
+    //  Adding interactive area
+    svg_1 = svg;
+
+    svg_1.append("rect")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("tabindex", 1)
+        .on("mousedown", mousedown);
+
+    d3.select(window)
+        .on("mousemove", mousemove)
+        .on("mouseup", mouseup)
+        .on("keydown", keydown);
+
+    svg_1.node().focus();
+
+  };
   
   function plotLnDvLine(line, color, da) {
     var svg = d3.select("div#calc_<%= lab_data.id %> g")
@@ -115,6 +138,12 @@ function plotLnDvGrid() {
         .style("stroke", color)
         .attr("d", line)
         .transition();
+
+    svg_1.append("path")
+          .datum(points)
+          .attr("class", "line calculation")
+          .call(redraw);
+
   }
 
   function plotLnDvPoint(da) {
@@ -166,4 +195,98 @@ function plotLnDvGrid() {
     }
   }, duration);
 
+  // Interactive functions
+  function redraw() {
+
+    if (points.length > 0) {
+      svg_1.select("path.calculation").attr("d", line);
+    };
+
+    var circle = svg_1.selectAll("circele.sq")
+        .data(points, function(d) { return d; });
+
+    circle.enter().append("circle")
+        .attr("class", "sq")
+        .attr("r", 1e-6)
+        .on("mousedown", function(d) { selected = dragged = d; redraw(); })
+      .transition()
+        .duration(750)
+        .ease("elastic")
+        .attr("r", 6.5);
+
+    circle
+        .classed("selected", function(d) { return d === selected; })
+        .attr("cx", function(d) { return d[0]; })
+        .attr("cy", function(d) { return d[1]; });
+
+    if (points.length === 1) {
+      X1 = points[0][0];
+      Y1 = points[0][1];
+    } else if (points.length === 2) {
+      X1 = points[0][0];
+      Y1 = points[0][1];
+      X2 = points[1][0];
+      Y2 = points[1][1];
+    };
+
+    // circle.exit().remove();
+
+    var cir = $('circle.sq');
+    cir.slice(0, cir.length - 2).remove();
+
+    if (d3.event) {
+      d3.event.preventDefault();
+      d3.event.stopPropagation();
+    };
+
+    showCoordinates();
+  }
+
+  function change() {
+    line.interpolate(this.value);
+    redraw();
+  }
+
+  function mousedown() {
+    if (points.length < 2) {
+      points.push(selected = dragged = d3.mouse(svg_1.node()));
+    };
+      redraw();
+  }
+
+  function mousemove() {
+    if (!dragged) return;
+    var m = d3.mouse(svg_1.node());
+    dragged[0] = Math.max(0, Math.min(width, m[0]));
+    dragged[1] = Math.max(0, Math.min(height, m[1]));
+    redraw();
+  }
+
+  function mouseup() {
+    if (!dragged) return;
+    mousemove();
+    dragged = null;
+  }
+
+  function keydown() {
+    if (!selected) return;
+    switch (d3.event.keyCode) {
+      case 8: // backspace
+      case 46: { // delete
+        var i = points.indexOf(selected);
+        points.splice(i, 1);
+        selected = points.length ? points[i > 0 ? i - 1 : 0] : null;
+        $('circle.sq').last().remove();
+        redraw();
+        break;
+      }
+    }
+  }
+
+  function showCoordinates() {
+    if (points.length === 2){
+      tanGens = (Y2 - Y1)/(X2 - X1);
+      $("div#tangens dd").empty().append(tanGens.toPrecision(4));
+    };
+  }
 </script>

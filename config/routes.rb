@@ -1,6 +1,5 @@
 Labs::Application.routes.draw do
 
-
   authenticated :user do
     root :to => "home#admin"
     match 'admin' => "home#admin", as: :admin
@@ -11,7 +10,8 @@ Labs::Application.routes.draw do
 
   resources :lab_datas
   resources :lab_works do 
-    match 'questions' => 'lab_works#questions', :as => :questions
+    match 'questions' => 'questions#index', :as => :questions
+    match 'result' => 'questions#result', :as => :questions_result
     match 'graph' => 'lab_works#graph', :as => :graph
   end
 

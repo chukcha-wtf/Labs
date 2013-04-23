@@ -1,7 +1,7 @@
 #encoding: utf-8
 
 class LabWorksController < ApplicationController
-  before_filter :authenticate_user!, except: [:index, :show, :graphs, :questions, :graph]
+  before_filter :authenticate_user!, except: [:index, :show, :graphs, :graph]
   
 
   def index
@@ -16,15 +16,6 @@ class LabWorksController < ApplicationController
   def graph
     @lab_work = LabWork.find(params[:lab_work_id])
     @lab_data = @lab_work.lab_datas.sample
-  end
-
-  def questions
-    @lab_work = LabWork.find(params[:lab_work_id])
-    @questions = @lab_work.questions
-    respond_to do |wants|
-      wants.html
-      wants.json { render json: @questions.to_json(include: { answers: {only: [:id, :question_id, :wright_answer]} }, only: [:id]) }
-    end
   end
 
   def show

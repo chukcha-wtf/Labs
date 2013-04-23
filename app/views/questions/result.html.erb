@@ -1,0 +1,18 @@
+<h2>Результати тестування</h2>
+
+<div class="row">
+  <div class="hero-unit">
+    <% if @good_boy %>
+      <h3>Вітаємо, Ви здали допуск і тепер можете переходити до виконання лабораторної роботи</h3>
+      <div class="text-center">
+        <%= link_to 'Перейти', lab_work_graph_path(@lab_work), class: 'btn btn-large btn-success' %>
+      </div>
+    <% else %>
+      <h3>Ваших знаннь не достатньо для того щоби виконувати цю роботу.</h3>
+      <p>Вам необхідно ще раз, уважніше, ознайомитись з теоретичною частиною.</p>
+      <div class="text-center">
+        <%= link_to 'Перечитати теорію', '#', class: 'btn btn-large btn-warning' %>
+      </div>
+    <% end %>
+  </div>
+</div>

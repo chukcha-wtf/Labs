@@ -53,3 +53,26 @@ div.tooltip {
 .grid path {
   stroke-width: 0;
 }
+
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+circle.sq,
+path.line.calculation {
+  fill: none;
+  stroke: green;
+  stroke-width: 2.5px;
+}
+
+circle.sq {
+  fill: #fff;
+  fill-opacity: .2;
+  cursor: move;
+}
+
+.selected {
+  fill: #ff7f0e;
+  stroke: #ff7f0e;
+}

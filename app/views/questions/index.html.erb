@@ -1,0 +1,24 @@
+<h3>Тестування на закріплення матеріалу</h3>
+
+<div class="row">
+  <div class="span6 offset3">
+    <br>
+    <%= form_tag(lab_work_questions_result_path) do %>
+      <% @questions.each do |question| %>
+        <blockquote>
+          <p><%= question.content %></p>
+        </blockquote>
+        <ol>
+          <%= hidden_field_tag 'quest[]', question.id %>
+          <% question.answers.each do |answer| %>
+              <li>
+                <%= check_box_tag "quest[]answer[]", answer.id %><%= answer.content %>
+              </li>
+          <% end %>
+        </ol>
+        <br>
+      <% end %>
+      <%= submit_tag 'Результати', class: 'btn' %>
+    <% end %>
+  </div>
+</div>
